@@ -1,0 +1,10 @@
+{
+    "languageServer.luau.definitions": [
+        "Packages/_Index"
+    ],
+    "languageServer.luau.imports.requireRoots": {
+        "Packages": "Packages"
+    },
+    "languageServer.luau.autocompleteSuggestImports": true,
+    "languageServer.luau.diagnostics.strictMode": false
+}

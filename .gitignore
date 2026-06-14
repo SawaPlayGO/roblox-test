@@ -1,0 +1,21 @@
+# Project place file
+/test.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+# Dependencies installed by Wally
+Packages/
+
+# Generated files
+sourcemap.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.code-workspace
+.idea/
