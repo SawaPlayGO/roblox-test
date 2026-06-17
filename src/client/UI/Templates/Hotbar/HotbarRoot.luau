@@ -53,36 +53,34 @@ return function(props)
         end
     end, {inventory})
 
-    -- Обработка колёсика мыши для переключения слотов
     React.useEffect(function()
         local conn = UserInputService.InputChanged:Connect(function(input, gameProcessed)
-            if input.UserInputType == Enum.UserInputType.MouseWheel then
-                local delta = input.Position.Z
+            if gameProcessed then return end
+            if input.UserInputType ~= Enum.UserInputType.MouseWheel then return end
+            
+            -- Используем значение Position.Z для определения направления
+            -- > 0 — прокрутка вверх, < 0 — прокрутка вниз
+            local delta = input.Position.Z
+            
+            setActiveSlot(function(prev)
                 local slotCount = getSlotCount()
-                print("Колёсико:", delta, "слотов:", slotCount)
+                if slotCount <= 0 then return prev end
+                
+                local newSlot = prev
                 if delta > 0 then
-                    -- Вперед
-                    setActiveSlot(function(prev)
-                        local next = prev + 1
-                        if next > slotCount then
-                            return 1
-                        end
-                        return next
-                    end)
-                    ClientState.activeSlot = activeSlot + 1
+                    -- Вверх (обычно это вправо или предыдущий слот)
+                    newSlot = (prev <= 1) and slotCount or (prev - 1)
                 else
-                    -- Назад
-                    setActiveSlot(function(prev)
-                        local next = prev - 1
-                        if next < 1 then
-                            return slotCount
-                        end
-                        return next
-                    end)
-                    ClientState.activeSlot = activeSlot - 1
+                    -- Вниз (обычно это влево или следующий слот)
+                    newSlot = (prev >= slotCount) and 1 or (prev + 1)
                 end
-            end
+                
+                -- Обновляем и глобальное состояние, если нужно
+                ClientState.activeSlot = newSlot
+                return newSlot
+            end)
         end)
+        
         return function()
             conn:Disconnect()
         end

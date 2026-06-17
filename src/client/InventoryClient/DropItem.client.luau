@@ -10,7 +10,7 @@ local DropItem: RemoteEvent = Events:WaitForChild("DropItem")
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed then
 		if input.KeyCode == Enum.KeyCode.Q then
-            activeSlot = ClientState.activeSlot
+            local activeSlot = ClientState.activeSlot
             DropItem:FireServer(activeSlot)
         end
     end

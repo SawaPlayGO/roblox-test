@@ -4,59 +4,62 @@ local React = require(ReplicatedStorage.Packages.React)
 local HotbarSlot = require(StarterPlayer.StarterPlayerScripts.Client.UI.Templates.Hotbar.HotbarSlot)
 local ItemRegistry = require(ReplicatedStorage.Shared.ItemRegistry)
 
+local SLOT_SIZE = 80
+local SLOT_PADDING = 10
+
 return function(props)
     local inventory = props.Inventory or {}
     local activeSlot = props.ActiveSlot or 1
-    local onSlotClick = props.OnSlotClick or function() end
 
-    -- собираем стаки: { [itemId] = count }
-    local stacks = {}
-    for _, itemId in inventory do
-        stacks[itemId] = (stacks[itemId] or 0) + 1
-    end
-
-    -- уникальные слоты по порядку
+    -- сортируем по номеру слота
     local slots = {}
-    local seen = {}
-    for _, itemId in inventory do
-        if not seen[itemId] then
-            seen[itemId] = true
-            local data = ItemRegistry[itemId]
+    for _, entry in ipairs(inventory) do
+        local data = ItemRegistry[entry.itemId]
+        if data then
             table.insert(slots, {
-                itemId = itemId,
-                name = data.name,
-                icon = data.icon,
-                count = stacks[itemId],
+                slot   = entry.slot,
+                itemId = entry.itemId,
+                name   = data.name,
+                icon   = data.icon,
+                count  = entry.count,
             })
         end
     end
+    table.sort(slots, function(a, b) return a.slot < b.slot end)
 
-    -- строим children как словарь
+    -- считаем размеры
+    local slotCount = math.max(#slots, 1)
+    local totalWidth = slotCount * SLOT_SIZE + (slotCount - 1) * SLOT_PADDING
+    local screenWidth = workspace.CurrentCamera.ViewportSize.X * 0.95
+    local scale = math.min(1, screenWidth / totalWidth)
+
+    -- строим children
     local children = {
         Layout = React.createElement("UIListLayout", {
             FillDirection = Enum.FillDirection.Horizontal,
             HorizontalAlignment = Enum.HorizontalAlignment.Center,
             VerticalAlignment = Enum.VerticalAlignment.Center,
-            Padding = UDim.new(0, 10),
+            Padding = UDim.new(0, SLOT_PADDING),
+            SortOrder = Enum.SortOrder.Name,
+        }),
+        Scale = React.createElement("UIScale", {
+            Scale = scale,
         }),
     }
 
-    for i, item in slots do
-        children["Slot_" .. i] = React.createElement(HotbarSlot, {
-            Index = i,
+    for _, item in ipairs(slots) do
+        children[string.format("Slot_%02d", item.slot)] = React.createElement(HotbarSlot, {
+            Index = item.slot,
             Item = item,
-            IsActive = i == activeSlot,
+            IsActive = item.slot == activeSlot,
             OnClick = function()
-                onSlotClick(i)
+                props.OnSlotClick(item.slot)
             end,
         })
     end
 
-    -- Если инвентарь пуст, показываем пустой фрейм
-    local frameSize = #slots > 0 and (#slots * 90) or 90
-
     return React.createElement("Frame", {
-        Size = UDim2.new(0, frameSize, 0, 90),
+        Size = UDim2.fromOffset(totalWidth, SLOT_SIZE),
         AnchorPoint = Vector2.new(0.5, 1),
         Position = UDim2.new(0.5, 0, 1, -20),
         BackgroundTransparency = 1,

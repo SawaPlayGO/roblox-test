@@ -3,8 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService") -- Добавили сервис для работы с кадрами
 local Highlight = require(script.Parent.Highlight)
 
-local pickupEvent: RemoteEvent = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Events"):WaitForChild("pickupEvent")
-local inventoryUpdated: RemoteEvent = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Events"):WaitForChild("InventoryUpdated")
+local pickupEvent: RemoteEvent = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Events"):WaitForChild("PickupEvent")
 
 local player = game.Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -29,24 +28,6 @@ end
 player.CharacterAdded:Connect(updateRaycastFilter)
 updateRaycastFilter(player.Character)
 
--- Обработка нажатия кнопки E
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed then
-		if input.KeyCode == Enum.KeyCode.E then
-			print("E нажата, isHovering:", isHovering, "lastTarget:", lastTarget)
-			if isHovering and lastTarget then
-				print("Отправляем на сервер запрос подбора:", lastTarget.Name)
-				pickupEvent:FireServer(lastTarget)
-				
-				-- БАГФИКС: Мгновенно гасим подсветку и обнуляем цель, так как предмет сейчас исчезнет
-				Highlight.removeHighlight(lastTarget)
-				isHovering = false
-				lastTarget = nil
-			end
-		end
-	end
-end)
-
 local function checkTargetInCenter()
 	local cameraCFrame = camera.CFrame
 	
@@ -67,7 +48,6 @@ local function checkTargetInCenter()
 		end
 		isHovering = false
 		lastTarget = nil
-		print("Цель потеряна или изменилась, убираем подсветку")
 	end
 
 	-- Если перед прицелом находится валидный предмет для подбора
@@ -76,14 +56,26 @@ local function checkTargetInCenter()
 			isHovering = true
 			lastTarget = currentTarget
 			Highlight.createHighlight(currentTarget)
-			print("Авто-подсветка предмета в прицеле:", currentTarget.Name, "ItemId:", currentTarget:GetAttribute("ItemId"))
 		end
 	end
 end
 
+-- Обработка нажатия кнопки E
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed then
+		if input.KeyCode == Enum.KeyCode.E then
+			if isHovering and lastTarget then
+				print("Отправляем на сервер запрос подбора:", lastTarget.Name)
+				pickupEvent:FireServer(lastTarget)
+				
+				-- БАГФИКС: Мгновенно гасим подсветку и обнуляем цель, так как предмет сейчас исчезнет
+				Highlight.removeHighlight(lastTarget)
+				isHovering = false
+				lastTarget = nil
+			end
+		end
+	end
+end)
+
 -- Привязываем проверку к обновлению кадров (работает даже без движения мыши)
 RunService.RenderStepped:Connect(checkTargetInCenter)
-
-inventoryUpdated.OnClientEvent:Connect(function(inventoryData)
-	print("Клиент получил обновление инвентаря:", inventoryData)
-end)
