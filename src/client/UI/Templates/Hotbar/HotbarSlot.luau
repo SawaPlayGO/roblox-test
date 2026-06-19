@@ -5,10 +5,13 @@ return function(props)
     local item = props.Item -- { name, icon, count, itemId }
     local isActive = props.IsActive or false
     local onClick = props.OnClick or function() end
+    local transparency = props.Transparency or 0 -- 0 = opaque, 1 = fully transparent
+    
 
     return React.createElement("Frame", {
         Size = UDim2.fromOffset(80, 80),
         BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BackgroundTransparency = transparency,
         BorderSizePixel = 0,
     }, {
         Corner = React.createElement("UICorner", {
@@ -20,6 +23,7 @@ return function(props)
             Enabled = isActive,
             Color = Color3.fromRGB(255, 255, 255),
             Thickness = 2,
+            Transparency = transparency,
         }),
 
         -- иконка предмета
@@ -29,6 +33,7 @@ return function(props)
             Position = UDim2.fromScale(0.5, 0.05),
             BackgroundTransparency = 1,
             Image = item and item.icon or "",
+            ImageTransparency = transparency,
         }),
 
         -- название предмета (одна строка, без фона)
@@ -54,7 +59,7 @@ return function(props)
             Position = UDim2.new(1, -10, 1, -2),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Text = item and "x" .. tostring(item.count) or "",
+            Text = (item and item.count > 1) and "x" .. tostring(item.count) or "",
             TextColor3 = Color3.fromRGB(255, 255, 255),
             TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Right,

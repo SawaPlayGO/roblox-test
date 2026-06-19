@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 -- Внутри ModuleScript (InventoryManager)
 local InventoryManager = {}
 
@@ -50,6 +51,25 @@ function InventoryManager.ReorganizeInventory(inventory: Folder)
         countVal.Value = itemData.count
         countVal.Parent = slot
     end
+end
+
+function InventoryManager.GetHandOffset()
+	local localPlayer = Players.LocalPlayer
+	if not localPlayer then return CFrame.new() end -- Защита, если вызвано на сервере
+
+	local character = localPlayer.Character
+	if not character then return CFrame.new() end
+
+	local realHand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+	local customHand = character:FindFirstChild("Hand") -- Твоя локальная рука из камеры
+
+	-- Если какой-то из рук нет, возвращаем пустое смещение (башня заспавнится в дефолтном плече)
+	if not realHand or not customHand then
+		return CFrame.new()
+	end
+
+	-- Считаем и возвращаем разницу между реальным телом и твоей клиентской рукой
+	return realHand.CFrame:ToObjectSpace(customHand.CFrame)
 end
 
 return InventoryManager
