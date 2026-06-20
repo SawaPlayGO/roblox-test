@@ -20,4 +20,11 @@ return {
         maxStack = 64,
         type = "ammo",
     },
+    [4] = {
+        name = "Revolver",
+        modelName = "RevolverModel",
+        icon = "rbxasset://textures/Cursors/MouseLockedCursor.png",
+        maxStack = 1,
+        type = "weapon",
+    },
 }

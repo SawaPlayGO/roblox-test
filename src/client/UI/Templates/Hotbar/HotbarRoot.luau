@@ -29,7 +29,28 @@ return function(props)
 		return math.max(count, 1) -- Минимум 1 слот
 	end
 
-	-- ЭФФЕКТ: Срабатывает КАЖДЫЙ РАЗ, когда меняется activeSlot
+	-- ЭФФЕКТ: Проверяет валидность activeSlot при изменении инвентаря
+	React.useEffect(function()
+		-- Если инвентарь пуст или activeSlot не существует в инвентаре, сбросить на первый слот
+		if #inventory == 0 then
+			setActiveSlot(1)
+		else
+			local slotExists = false
+			for _, entry in ipairs(inventory) do
+				if entry.slot == activeSlot then
+					slotExists = true
+					break
+				end
+			end
+			if not slotExists then
+				-- Найти первый доступный слот
+				local firstSlot = inventory[1] and inventory[1].slot or 1
+				setActiveSlot(firstSlot)
+			end
+		end
+	end, {inventory})
+
+	-- ЭФФЕКТ: Срабатывает когда меняется activeSlot или inventory
 	-- Он собирает CFrame смещения и мгновенно отправляет серверу
 	React.useEffect(function()
 		-- Вычисляем смещение локальной руки относительно серверного плеча
@@ -40,7 +61,7 @@ return function(props)
 		
 		-- На всякий случай синхронизируем глобальный стейт клиента
 		ClientState.activeSlot = activeSlot
-	end, {activeSlot}) -- Зависимость выставлена на изменение слота
+	end, {activeSlot, inventory}) -- Зависимость на изменение слота или инвентаря
 
 	-- Обработка горячих клавиш 1-9 и 0 для переключения слотов
 	React.useEffect(function()

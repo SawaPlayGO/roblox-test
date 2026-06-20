@@ -70,36 +70,28 @@ local function _UpdateSlotCount(inventory: Folder, slotNumber: number, add: bool
 end
 
 pickupEvent.OnServerEvent:Connect(function(player: Player, item: BasePart)
-    print(`[Pickup] {player.Name} пытается подобрать {item and item.Name or "nil"}`)
-
     local character = player.Character
     local inventory = player:FindFirstChild("Inventory")
 
     if not item or not item.Parent then
-        print("[Pickup] Предмет не существует или нет Parent")
         return
     end
     if not character then
-        print("[Pickup] Нет персонажа")
         return
     end
     if not inventory then
-        print("[Pickup] Нет инвентаря")
         return
     end
 
     local distance = (character.HumanoidRootPart.Position - item.Position).Magnitude
     if distance > 15 then
-        print(`[Pickup] Слишком далеко: {distance}`)
         return
     end
 
     local itemId = item:GetAttribute("ItemId")
     if not itemId then
-        print("[Pickup] У предмета нет атрибута ItemId")
         return
     end
-    print(`[Pickup] ItemId: {itemId}`)
 
     local itemData = ItemRegistry[itemId]
     local targetSlot = nil
@@ -110,25 +102,20 @@ pickupEvent.OnServerEvent:Connect(function(player: Player, item: BasePart)
         if slotItemId and slotCount then
             if slotItemId.Value == itemId and slotCount.Value < itemData.maxStack then
                 targetSlot = tonumber(slot.Name)
-                print(`[Pickup] Найден стак в слоте {targetSlot}, count: {slotCount.Value}/{itemData.maxStack}`)
                 break
             end
         end
     end
 
     if targetSlot then
-        print(`[Pickup] Добавляем в существующий слот {targetSlot}`)
         _UpdateSlotCount(inventory, targetSlot, true)
     else
-        print("[Pickup] Создаём новый слот")
         if not _CreateSlot(inventory, itemId) then
-            print("[Pickup] Инвентарь полон!")
             return
         end
     end
 
     item:Destroy()
-    InventoryManager.ReorganizeInventory(inventory)
     InventoryManager.SendInventoryToClient(player)
 end)
 

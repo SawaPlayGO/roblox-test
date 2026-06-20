@@ -11,7 +11,6 @@ local function RootUI()
 
     React.useEffect(function()
         local conn = inventoryUpdated.OnClientEvent:Connect(function(data)
-            print("Клиент получил обновление инвентаря:", data)
             setInventory(data)
         end)
         return function()

@@ -65,10 +65,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed then
 		if input.KeyCode == Enum.KeyCode.E then
 			if isHovering and lastTarget then
-				print("Отправляем на сервер запрос подбора:", lastTarget.Name)
 				pickupEvent:FireServer(lastTarget)
-				
-				-- БАГФИКС: Мгновенно гасим подсветку и обнуляем цель, так как предмет сейчас исчезнет
 				Highlight.removeHighlight(lastTarget)
 				isHovering = false
 				lastTarget = nil
