@@ -30,11 +30,18 @@ RoundPlatform.Touched:Connect(function(hit: BasePart)
     RoundStart:FireClient(player, true)
 end)
 
+RoundStart.OnServerEvent:Connect(function(player: Player, positionTeleport: Vector3)
+    local character = player.Character
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    rootPart.CFrame = CFrame.new(positionTeleport)
+end)
+
 RoundLeave.OnServerEvent:Connect(function(player: Player)
     local character = player.Character
     local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
     if humanoidRootPart then
-        humanoidRootPart.CFrame = RoundPlatform.CFrame + Vector3.new(8, 3, 0)
+        local roundPlatformPosition = RoundPlatform.Position
+        humanoidRootPart.CFrame = CFrame.new(roundPlatformPosition.X, 3, roundPlatformPosition.Z-12)
 
     local playerStart: Folder = RoundPlatform:FindFirstChild("PlayerStart")
     if not playerStart then return end
@@ -42,19 +49,6 @@ RoundLeave.OnServerEvent:Connect(function(player: Player)
     local playerString = playerStart:FindFirstChild(player.Name)
     if not playerString then return end
     playerString:Destroy()
+    RoundLeave:FireClient(player)
     end
 end)
-
--- RoundPlatform.TouchEnded:Connect(function(hit: BasePart)
---     local character = hit.Parent
---     if not character then return end
---     local player: Player = Players:GetPlayerFromCharacter(character)
---     if not player then return end
-
---     local playerStart: Folder = RoundPlatform:FindFirstChild("PlayerStart")
---     if not playerStart then return end
-
---     local playerString = playerStart:FindFirstChild(player.Name)
---     if not playerString then return end
---     playerString:Destroy()
--- end)

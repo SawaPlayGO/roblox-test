@@ -5,8 +5,6 @@ local React = require(ReplicatedStorage.Packages.React)
 export type ButtonAnimationConfig = {
     hoverScale: number?,      -- множитель размера при наведении, например 1.05
     pressScale: number?,      -- множитель при нажатии, например 0.95
-    hoverColor: Color3?,      -- цвет при наведении (опционально)
-    baseColor: Color3?,       -- исходный цвет (нужен, если задан hoverColor)
     tweenTime: number?,       -- длительность анимации
     easingStyle: Enum.EasingStyle?,
 }

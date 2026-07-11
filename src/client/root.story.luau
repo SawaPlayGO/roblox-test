@@ -7,7 +7,7 @@ local e = React.createElement
 
 return function(parent)
     local root = ReactRoblox.createRoot(parent)
-    local app = e(LeaveRoundPlatform)
+    local app = e(LeaveRoundPlatform.Component)
     root:render(app)
 
     return function()
